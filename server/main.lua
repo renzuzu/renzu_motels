@@ -1,8 +1,6 @@
 --DeleteResourceKvp('renzu_motels')
-local Motels = json.decode(GetResourceKvpString('renzu_motels') or '[]') or {}
 GlobalState.Motels = json.decode(GetResourceKvpString('renzu_motels') or '[]') or {}
 CreateInventoryHooks = function(motel,Type)
-	--print(motel,Type)
 	if GetResourceState('ox_inventory') ~= 'started' then return end
 	local inventory = '^'..Type..'_'..motel..'_%w+'
 	local hookId = exports.ox_inventory:registerHook('swapItems', function(payload)
@@ -18,7 +16,6 @@ end
 
 Citizen.CreateThreadNow(function()
 	local motels = GlobalState.Motels
-	local Motel = {}
 	for k,v in pairs(config.motels) do
 		if not motels[v.motel] then print('creating motel') motels[v.motel] = {} end
 		if motels[v.motel].revenue == nil then print('creating revenues') motels[v.motel].revenue = 0 end
@@ -30,7 +27,6 @@ Citizen.CreateThreadNow(function()
 			if not motels[v.motel].rooms[doorindex] then print('creating doors') motels[v.motel].rooms[doorindex] = {} end
 			if not motels[v.motel].rooms[doorindex].players then print('creating player') motels[v.motel].rooms[doorindex].players = {} end
 			motels[v.motel].rooms[doorindex].lock = true
-			--print(motels[v.motel][doorindex].players)
 			if motels[v.motel].rooms[doorindex].players and GetResourceState('ox_inventory') == 'started' then
 				for id,_ in pairs(motels[v.motel].rooms[doorindex].players) do
 					local stashid = v.uniquestash and id or 'room'
@@ -45,7 +41,7 @@ Citizen.CreateThreadNow(function()
 	GlobalState.Motels = motels
 	SetResourceKvp('renzu_motels',json.encode(motels))
 
-	local savecd = 60
+	local savecd = 5 -- save data every 5 minutes
 	while true do
 		local save = false
 		local motels = GlobalState.Motels
@@ -64,7 +60,7 @@ Citizen.CreateThreadNow(function()
 		GlobalState.Motels = motels
 		if save or savecd <= 0 then
 			SetResourceKvp('renzu_motels',json.encode(motels))
-			savecd = 60
+			savecd = 5
 			print('saved')
 		end
 		Wait(60000)
@@ -83,8 +79,6 @@ lib.callback.register('renzu_motels:rentaroom', function(src,data)
 		motels[data.motel].rooms[data.index].players[identifier] = (os.time() + ( data.duration * 3600))
 		motels[data.motel].revenue += amount
 		GlobalState.Motels = motels
-		print(motels[data.motel].rooms[data.index].players[identifier])
-		--SetResourceKvp('renzu_motels',json.encode(motels))
 		if GetResourceState('ox_inventory') == 'started' then
 			local stashid = data.uniquestash and identifier or 'room'
 			exports.ox_inventory:RegisterStash('stash_'..data.motel..'_'..stashid..'_'..data.index, 'Storage', 70, 70000, false)
@@ -186,7 +180,6 @@ lib.callback.register('renzu_motels:addemployee', function(src,motel,id)
 	local toPlayer = GetPlayerFromId(tonumber(id))
 	local motels = GlobalState.Motels
 	if motels[motel].owned == xPlayer.identifier and toPlayer then
-		print(toPlayer.name)
 		motels[motel].employees[toPlayer.identifier] = toPlayer.name
 		GlobalState.Motels = motels
 		return true
@@ -264,7 +257,6 @@ lib.callback.register('renzu_motels:sendinvoice', function(src,motel,data)
 		while invoices[id] ~= 'paid' and timer > 0 do timer -= 1 Wait(1000) end
 		local paid = invoices[id] == 'paid'
 		invoices[id] = nil
-		print('send invoice',paid)
 		return paid
 	end
 	return false
