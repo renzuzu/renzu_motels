@@ -1,6 +1,7 @@
 if GetResourceState('ox_target') ~= 'started' or not config.target then return end
 
 MotelFunction = function(data)
+	if not data.Mlo and data.type ~= 'door' then return end
 	local options = {}
 	if data.type == 'door' then
 		AddDoorToSystem(data.index, data.door, data.coord)
