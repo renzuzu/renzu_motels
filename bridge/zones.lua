@@ -49,23 +49,27 @@ ZoneMenu = function(data)
 end
 
 MotelFunction = function(data)
+	if not data.Mlo and data.type ~= 'door' then return end
 	local options = {}
 	AddDoorToSystem(data.index, data.door, data.coord)
 	SetDoorState(data)
-	local blip = AddBlipForCoord(data.coord.x,data.coord.y,data.coord.z)
-	SetBlipSprite(blip,685+data.index)
-	SetBlipColour(blip,0)
-	SetBlipSecondaryColour(blip,255,255,255)
-	SetBlipAsShortRange(blip,true)
-	SetBlipScale(blip,0.3)
-	BeginTextCommandSetBlipName("STRING")
-	AddTextComponentString('Door '..data.index)
-	EndTextCommandSetBlipName(blip)
-	table.insert(blips,blip)
+	if data.type == 'door' then
+		local blip = AddBlipForCoord(data.coord.x,data.coord.y,data.coord.z)
+		SetBlipSprite(blip,685+data.index)
+		SetBlipColour(blip,0)
+		SetBlipSecondaryColour(blip,255,255,255)
+		SetBlipAsShortRange(blip,true)
+		SetBlipScale(blip,0.3)
+		BeginTextCommandSetBlipName("STRING")
+		AddTextComponentString('Door '..data.index)
+		EndTextCommandSetBlipName(blip)
+		table.insert(blips,blip)
+	end
 	local point = lib.points.new(data.coord, 2)
 	
 	function point:onEnter()
-		lib.showTextUI('[E] - Door '..data.index)
+		local text = data.type == 'door' and 'Door '..data.index or data.type:upper()
+		lib.showTextUI('[E] - '..text)
 	end
 	
 	function point:onExit()
