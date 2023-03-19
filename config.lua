@@ -1,5 +1,5 @@
 config = {}
-config.wardrobe = 'fivem-appearance' -- choose your skin menu
+config.wardrobe = 'illenium-appearance' -- choose your skin menu
 config.target = false -- false = markers zones type. true = ox_target, qb-target
 config.breakinJobs = { -- jobs can break in to door using gunfire in doors
 	['police'] = true,
@@ -55,12 +55,13 @@ config.shells = {
 
 config.motels = {
 	[1] = { -- index name of motel
-		Mlo = false, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
+		Mlo = true, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'standard', -- shell type, configure only if using Mlo = true
 		label = 'Pink Cage Motel',
 		hour_rate = 1000,
 		businessprice = 1000000,
 		motel = 'pinkcage',
+		door = `gabz_pinkcage_doors_front`, -- door hash
 		rentcoord = vec3(313.38,-225.20,54.212),
 		coord = vec3(326.04,-210.47,54.086), -- center of the motel location
 		radius = 50.0, -- radius of motel location
@@ -162,6 +163,7 @@ config.motels = {
 		label = 'Yacht Club Motel',
 		hour_rate = 10000,
 		motel = 'yacht',
+		door = `gabz_pinkcage_doors_front`, -- door hash
 		businessprice = 1000000,
 		rentcoord = vec3(-916.54,-1302.56,6.2001),
 		coord = vec3(-916.54,-1302.56,6.2001), -- center of the motel location
@@ -185,6 +187,7 @@ config.motels = {
 		shell = 'modern', -- shell type, configure only if using Mlo = true
 		label = 'Motel Modern', -- hotel label
 		hour_rate = 15000, -- hotel hour rate
+		door = `gabz_pinkcage_doors_front`, -- door hash
 		motel = 'hotelmodern3', -- hotel index name
 		rentcoord = vec3(515.21173095703,225.36326599121,104.74),
 		coord = vec3(505.55709838867,213.49201965332,102.89), -- center of the motel location
