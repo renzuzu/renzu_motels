@@ -223,7 +223,8 @@ RoomList = function(data)
 	local options = {}
 	--local motels = GlobalState.Motels
 	for doorindex,v in ipairs(data.doors) do
-		local duration = motels[data.motel].rooms[doorindex].players[PlayerData.identifier]
+		local playerroom = motels[data.motel].rooms[doorindex].players[PlayerData.identifier]
+		local duration = playerroom?.duration
 		local occupants = CountOccupants(motels[data.motel].rooms[doorindex].players)
 		if occupants < data.maxoccupants and not duration then
 			table.insert(options,{
@@ -325,19 +326,32 @@ Owner.Rooms.Occupants = function(data,index)
 	local motel = motels[data.motel]
 	local players = motel.rooms[index] and motel.rooms[index].players or {}
 	local options = {}
-	for player,duration in pairs(players) do
-		local hour = math.floor((duration - time) / 3600)
-		local duration_left = hour .. ' Hours : '..math.floor(((duration - time) / 60) - (60 * hour))..' Minutes'
+	for player,char in pairs(players) do
+		local hour = math.floor((char.duration - time) / 3600)
+		local name = char.name or 'No Name'
+		local duration_left = hour .. ' Hours : '..math.floor(((char.duration - time) / 60) - (60 * hour))..' Minutes'
 		table.insert(options,{
-			title = 'Occupant '..player,
+			title = 'Occupant '..name,
 			description = 'Rent Duration: '..duration_left,
 			icon = 'hotel',
 			onSelect = function()
+				local kick = lib.alertDialog({
+					header = 'Confirmation',
+					content = '## Kick Occupant \n  **Name:** '..name,
+					centered = true,
+					labels = {
+						cancel = 'close',
+						confirm = 'Kick',
+						waw = 'waw'
+					},
+					cancel = true
+				})
+				if kick == 'cancel' then return end
 				local success = lib.callback.await('renzu_motels:removeoccupant',false,data,index,player)
 				if success then
-					Notify('Successfully kicked '..player..' from room '..index,'success')
+					Notify('Successfully kicked '..name..' from room '..index,'success')
 				else
-					Notify('Failed to kicked '..player..' from room '..index,'error')
+					Notify('Failed to kicked '..name..' from room '..index,'error')
 				end
 			end,
 			arrow = true,
@@ -355,7 +369,9 @@ Owner.Rooms.Occupants = function(data,index)
 					})
 					if not input then return end
 					local success = lib.callback.await('renzu_motels:addoccupant',false,data,index,input)
-					if success then
+					if success == 'exist' then
+						Notify('Already exist from room '..index,'error')
+					elseif success then
 						Notify('Successfully Add '..input[1]..' from room '..index,'success')
 					else
 						Notify('Failed to Add '..input[1]..' from room '..index,'error')
@@ -375,11 +391,13 @@ Owner.Rooms.Occupants = function(data,index)
 end
 
 Owner.Rooms.List = function(data)
+	local motels = GlobalState.Motels
 	local options = {}
 	for doorindex,v in ipairs(data.doors) do
+		local occupants = CountOccupants(motels[data.motel].rooms[doorindex].players)
 		table.insert(options,{
 			title = 'Room #'..doorindex,
-			description = 'Add or Kick Occupants from room #'..doorindex,
+			description = 'Add or Kick Occupants from room #'..doorindex..' \n ***Occupants:*** '..occupants,
 			icon = 'hotel',
 			onSelect = function()
 				return Owner.Rooms.Occupants(data,doorindex)

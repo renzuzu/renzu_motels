@@ -42,8 +42,8 @@ Citizen.CreateThreadNow(function()
 			if not save[motel] then save[motel] = 0 end
 			for doorindex,v in pairs(data.rooms or {}) do
 				local doorindex = tonumber(doorindex)
-				for player,duration in pairs(v.players or {}) do
-					if (duration - os.time()) < 0 then
+				for player,char in pairs(v.players or {}) do
+					if (char.duration - os.time()) < 0 then
 						motels[motel].rooms[doorindex].players[player] = nil
 						db.updateall('rooms = ?', '`motel`', motel, json.encode(motels[motel].rooms))
 					end
@@ -69,7 +69,9 @@ lib.callback.register('renzu_motels:rentaroom', function(src,data)
 		local amount = (data.duration * data.hour_rate)
 		if money <= amount then return end
 		xPlayer.removeMoney(amount)
-		motels[data.motel].rooms[data.index].players[identifier] = (os.time() + ( data.duration * 3600))
+		if not motels[data.motel].rooms[data.index].players[identifier] then motels[data.motel].rooms[data.index].players[identifier] = {} end
+		motels[data.motel].rooms[data.index].players[identifier].name = xPlayer.name
+		motels[data.motel].rooms[data.index].players[identifier].duration = (os.time() + ( data.duration * 3600))
 		motels[data.motel].revenue += amount
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?, revenue = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms),motels[data.motel].revenue)
@@ -95,7 +97,7 @@ lib.callback.register('renzu_motels:payrent', function(src,data)
 	if motels[data.motel].rooms[data.index].players[xPlayer.identifier] then
 		xPlayer.removeMoney(data.amount)
 		motels[data.motel].revenue += data.amount
-		motels[data.motel].rooms[data.index].players[xPlayer.identifier] += ( duration * 3600)
+		motels[data.motel].rooms[data.index].players[xPlayer.identifier].duration += ( duration * 3600)
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?, revenue = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms),motels[data.motel].revenue)
 		return true
@@ -153,7 +155,10 @@ lib.callback.register('renzu_motels:addoccupant', function(src,data,index,player
 	local toPlayer = GetPlayerFromId(tonumber(player[1]))
 	local motels = GlobalState.Motels
 	if motels[data.motel].owned == xPlayer.identifier then
-		motels[data.motel].rooms[index].players[toPlayer.identifier] = ( os.time() + (tonumber(player[2]) * 3600))
+		if motels[data.motel].rooms[index].players[toPlayer.identifier] then return 'exist' end
+		if not motels[data.motel].rooms[index].players[toPlayer.identifier] then motels[data.motel].rooms[index].players[toPlayer.identifier] = {} end
+		motels[data.motel].rooms[index].players[toPlayer.identifier].name = toPlayer.name
+		motels[data.motel].rooms[index].players[toPlayer.identifier].duration = ( os.time() + (tonumber(player[2]) * 3600))
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms))
 		return true
