@@ -142,6 +142,7 @@ LockPick = function(data)
             motel = data.motel,
             index = data.index,
             coord = data.coord,
+			Mlo = data.Mlo
         })
 		Notify(DoorSystemGetDoorState(data.index) == 0 and 'You Locked the Motel Door' or 'You Unlocked the Motel Door', 'inform')
 	end
