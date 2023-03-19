@@ -26,5 +26,5 @@ WIP BETA version! - Fivem - Motel Management. Hourly Rental System. Supports MLO
 
 # Beta Version
 ```
-some features im looking to add later like Job Owneds , mysql supports and correct hour duration when viewing Occupants.
+some features im looking to add later like Job Owneds
 ```
