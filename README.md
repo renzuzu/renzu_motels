@@ -1,5 +1,5 @@
 # renzu_motels
-WIP BETA version! - Fivem - Motel Management. Hourly Rental System. Supports MLO and Shells. ESX/QBCORE
+Fivem - Motel Management. Hourly Rental System. Supports MLO and Shells. ESX/QBCORE
 
 ![image](https://user-images.githubusercontent.com/82306584/226111405-b162c926-6c00-4085-91ac-839f7ece117e.png)
 
