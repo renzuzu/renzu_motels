@@ -5,7 +5,8 @@ MotelFunction = function(data)
 	if not data.Mlo and data.type ~= 'door' then return end
 	local options = {}
 	if data.type == 'door' then
-		AddDoorToSystem(data.index, data.door, data.coord)
+		local doorIndex = data.door+data.index
+		AddDoorToSystem(doorIndex, data.door, data.coord)
 		SetDoorState(data)
 		local blip = AddBlipForCoord(data.coord.x,data.coord.y,data.coord.z)
 		SetBlipSprite(blip,685+data.index)

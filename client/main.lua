@@ -55,14 +55,14 @@ end
 
 SetDoorState = function(data)
 	local motels = GlobalState.Motels or {}
-	if motels[data.motel].rooms[data.index].lock or motels[data.motel].rooms[data.index].lock == nil then
-		DoorSystemSetDoorState(data.index, 1)
-	end
+	local doorindex = data.index + (joaat(data.motel))
+	DoorSystemSetDoorState(doorindex, 1)
 end
 
 RegisterNetEvent('renzu_motels:Door', function(data)
 	if not data.Mlo then return end
-	DoorSystemSetDoorState(data.index, DoorSystemGetDoorState(data.index) == 0 and 1 or 0, false, false)
+	local doorindex = data.index + (joaat(data.motel))
+	DoorSystemSetDoorState(doorindex, DoorSystemGetDoorState(doorindex) == 0 and 1 or 0, false, false)
 end)
 
 ClearPedTasks(cache.ped)
@@ -82,7 +82,8 @@ Door = function(data)
         })
 		local text
 		if data.Mlo then
-			text = DoorSystemGetDoorState(data.index) == 0 and 'You Locked the Motel Door' or 'You Unlocked the Motel Door'
+			local doorindex = data.index + (joaat(data.motel))
+			text = DoorSystemGetDoorState(doorindex) == 0 and 'You Locked the Motel Door' or 'You Unlocked the Motel Door'
 		else
 			text = not moteldoor?.lock and 'You Locked the Motel Door' or 'You Unlocked the Motel Door'
 		end
@@ -144,7 +145,8 @@ LockPick = function(data)
             coord = data.coord,
 			Mlo = data.Mlo
         })
-		Notify(DoorSystemGetDoorState(data.index) == 0 and 'You Locked the Motel Door' or 'You Unlocked the Motel Door', 'inform')
+		local doorindex = data.index + (joaat(data.motel))
+		Notify(DoorSystemGetDoorState(doorindex) == 0 and 'You Locked the Motel Door' or 'You Unlocked the Motel Door', 'inform')
 	end
 end
 
@@ -812,7 +814,8 @@ lib.onCache('weapon', function(weapon)
 						})
 						local text
 						if data.Mlo then
-							text = DoorSystemGetDoorState(data.index) == 0 and 'You Destroy the Motel Door'
+							local doorindex = data.index + (joaat(data.motel))
+							text = DoorSystemGetDoorState(doorindex) == 0 and 'You Destroy the Motel Door'
 						else
 							text = 'You Destroy the Motel Door'
 						end
