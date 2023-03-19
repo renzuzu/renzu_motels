@@ -245,6 +245,14 @@ config.stashblacklist = {
 }
 
 PlayerData,ESX,QBCORE,zones,shelzones,blips = {},nil,nil,{},{},{}
+
+function import(file)
+	local name = ('%s.lua'):format(file)
+	local content = LoadResourceFile(GetCurrentResourceName(),name)
+	local f, err = load(content)
+	return f()
+end
+
 if GetResourceState('es_extended') == 'started' then
 	ESX = exports['es_extended']:getSharedObject()
 elseif GetResourceState('qb-core') == 'started' then

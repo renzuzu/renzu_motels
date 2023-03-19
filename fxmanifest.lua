@@ -18,6 +18,7 @@ client_scripts {
 }
 
 server_scripts {
+	'@oxmysql/lib/MySQL.lua',
 	'bridge/framework/server/*.lua',
 	'bridge/inventory/server/*.lua',
 	'server/main.lua'

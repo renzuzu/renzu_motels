@@ -1,5 +1,6 @@
 --DeleteResourceKvp('renzu_motels')
-GlobalState.Motels = json.decode(GetResourceKvpString('renzu_motels') or '[]') or {}
+GlobalState.Motels = nil
+local db = import 'server/sql'
 CreateInventoryHooks = function(motel,Type)
 	if GetResourceState('ox_inventory') ~= 'started' then return end
 	local inventory = '^'..Type..'_'..motel..'_%w+'
@@ -15,17 +16,12 @@ CreateInventoryHooks = function(motel,Type)
 end
 
 Citizen.CreateThreadNow(function()
+	Wait(2000)
+	GlobalState.Motels = db.fetchAll()
 	local motels = GlobalState.Motels
 	for k,v in pairs(config.motels) do
-		if not motels[v.motel] then print('creating motel') motels[v.motel] = {} end
-		if motels[v.motel].revenue == nil then print('creating revenues') motels[v.motel].revenue = 0 end
-		if not motels[v.motel].hour_rate then print('creating rates') motels[v.motel].hour_rate = v.hour_rate end
-		if not motels[v.motel].employees then print('creating employee') motels[v.motel].employees = {} end
 		for doorindex,_ in pairs(v.doors) do
 			local doorindex = tonumber(doorindex)
-			if not motels[v.motel].rooms then print('creating doors') motels[v.motel].rooms = {} end
-			if not motels[v.motel].rooms[doorindex] then print('creating doors') motels[v.motel].rooms[doorindex] = {} end
-			if not motels[v.motel].rooms[doorindex].players then print('creating player') motels[v.motel].rooms[doorindex].players = {} end
 			motels[v.motel].rooms[doorindex].lock = true
 			if motels[v.motel].rooms[doorindex].players and GetResourceState('ox_inventory') == 'started' then
 				for id,_ in pairs(motels[v.motel].rooms[doorindex].players) do
@@ -39,30 +35,27 @@ Citizen.CreateThreadNow(function()
 		end
 	end
 	GlobalState.Motels = motels
-	SetResourceKvp('renzu_motels',json.encode(motels))
-
-	local savecd = 5 -- save data every 5 minutes
+	local save = {}
 	while true do
-		local save = false
 		local motels = GlobalState.Motels
 		for motel,data in pairs(motels) do
+			if not save[motel] then save[motel] = 0 end
 			for doorindex,v in pairs(data.rooms or {}) do
 				local doorindex = tonumber(doorindex)
 				for player,duration in pairs(v.players or {}) do
 					if (duration - os.time()) < 0 then
 						motels[motel].rooms[doorindex].players[player] = nil
-						save = true
+						db.updateall('rooms = ?', '`motel`', motel, json.encode(motels[motel].rooms))
 					end
 				end
+				if save[motel] <= 0 then
+					save[motel] = 60
+					db.updateall('rooms = ?', '`motel`', motel, json.encode(motels[motel].rooms))
+				end
 			end
+			save[motel] -= 1
 		end
-		savecd -= 1
 		GlobalState.Motels = motels
-		if save or savecd <= 0 then
-			SetResourceKvp('renzu_motels',json.encode(motels))
-			savecd = 5
-			print('saved')
-		end
 		Wait(60000)
 	end
 end)
@@ -79,6 +72,7 @@ lib.callback.register('renzu_motels:rentaroom', function(src,data)
 		motels[data.motel].rooms[data.index].players[identifier] = (os.time() + ( data.duration * 3600))
 		motels[data.motel].revenue += amount
 		GlobalState.Motels = motels
+		db.updateall('rooms = ?, revenue = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms),motels[data.motel].revenue)
 		if GetResourceState('ox_inventory') == 'started' then
 			local stashid = data.uniquestash and identifier or 'room'
 			exports.ox_inventory:RegisterStash('stash_'..data.motel..'_'..stashid..'_'..data.index, 'Storage', 70, 70000, false)
@@ -103,6 +97,7 @@ lib.callback.register('renzu_motels:payrent', function(src,data)
 		motels[data.motel].revenue += data.amount
 		motels[data.motel].rooms[data.index].players[xPlayer.identifier] += ( duration * 3600)
 		GlobalState.Motels = motels
+		db.updateall('rooms = ?, revenue = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms),motels[data.motel].revenue)
 		return true
 	end
 	return false
@@ -134,7 +129,7 @@ lib.callback.register('renzu_motels:buymotel', function(src,data)
 		xPlayer.removeMoney(data.businessprice)
 		motels[data.motel].owned = xPlayer.identifier
 		GlobalState.Motels = motels
-		SetResourceKvp('renzu_motels',json.encode(motels))
+		db.updateall('owned = ?', '`motel`', data.motel, motels[data.motel].owned)
 		return true
 	end
 	return false
@@ -147,6 +142,7 @@ lib.callback.register('renzu_motels:removeoccupant', function(src,data,index,pla
 	if motels[data.motel].owned == xPlayer.identifier then
 		motels[data.motel].rooms[index].players[player] = nil
 		GlobalState.Motels = motels
+		db.updateall('rooms = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms))
 		return true
 	end
 	return false
@@ -159,6 +155,7 @@ lib.callback.register('renzu_motels:addoccupant', function(src,data,index,player
 	if motels[data.motel].owned == xPlayer.identifier then
 		motels[data.motel].rooms[index].players[toPlayer.identifier] = ( os.time() + (tonumber(player[2]) * 3600))
 		GlobalState.Motels = motels
+		db.updateall('rooms = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms))
 		return true
 	end
 	return false
@@ -169,6 +166,7 @@ lib.callback.register('renzu_motels:editrate', function(src,motel,rate)
 	local motels = GlobalState.Motels
 	if motels[motel].owned == xPlayer.identifier then
 		motels[motel].hour_rate = tonumber(rate)
+		db.updateall('hour_rate = ?', '`motel`', motel, motels[motel].hour_rate)
 		GlobalState.Motels = motels
 		return true
 	end
@@ -182,6 +180,7 @@ lib.callback.register('renzu_motels:addemployee', function(src,motel,id)
 	if motels[motel].owned == xPlayer.identifier and toPlayer then
 		motels[motel].employees[toPlayer.identifier] = toPlayer.name
 		GlobalState.Motels = motels
+		db.updateall('employees = ?', '`motel`', motel, json.encode(motels[motel].employees))
 		return true
 	end
 	return false
@@ -193,6 +192,7 @@ lib.callback.register('renzu_motels:removeemployee', function(src,motel,identifi
 	if motels[motel].owned == xPlayer.identifier then
 		motels[motel].employees[identifier] = nil
 		GlobalState.Motels = motels
+		db.updateall('employees = ?', '`motel`', motel, json.encode(motels[motel].employees))
 		return true
 	end
 	return false
@@ -205,7 +205,7 @@ lib.callback.register('renzu_motels:transfermotel', function(src,motel,id)
 	if motels[motel].owned == xPlayer.identifier and toPlayer then
 		motels[motel].owned = toPlayer.identifier
 		GlobalState.Motels = motels
-		SetResourceKvp('renzu_motels',json.encode(motels))
+		db.updateall('owned = ?', '`motel`', motel, motels[motel].owned)
 		return true
 	end
 	return false
@@ -219,7 +219,7 @@ lib.callback.register('renzu_motels:sellmotel', function(src,data)
 		motels[data.motel].employees = {}
 		GlobalState.Motels = motels
 		xPlayer.addMoney(data.businessprice / 2)
-		SetResourceKvp('renzu_motels',json.encode(motels))
+		db.updateall('owned = ?, employees = ?', '`motel`', data.motel, motels[data.motel].owned,'[]')
 		return true
 	end
 	return false
@@ -232,6 +232,7 @@ lib.callback.register('renzu_motels:withdrawfund', function(src,motel,amount)
 		if motels[motel].revenue < amount or amount < 0 then return false end
 		motels[motel].revenue -= amount
 		GlobalState.Motels = motels
+		db.updateall('revenue = ?', '`motel`', motel, motels[motel].revenue)
 		xPlayer.addMoney(tonumber(amount))
 		return true
 	end
@@ -272,6 +273,7 @@ lib.callback.register('renzu_motels:payinvoice', function(src,data)
 			xPlayer.removeMoney(tonumber(data.amount))
 			GlobalState.Motels = motels
 			invoices[data.id] = 'paid'
+			db.updateall('revenue = ?', '`motel`', data.motel, motels[data.motel].revenue)
 		end
 		return invoices[data.id] == 'paid'
 	end
@@ -297,30 +299,7 @@ AddEventHandler('renzu_motels:Door', function(data)
 	if not data.Mlo then
 		local motels = GlobalState.Motels
 		motels[data.motel].rooms[data.index].lock = not motels[data.motel].rooms[data.index].lock
+		--db.updateall('rooms = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms))
 		GlobalState.Motels = motels
 	end
-end)
-
-RegisterServerEvent("esx_multicharacter:relog")
-AddEventHandler('esx_multicharacter:relog', function()
-	local source = source
-end)
-
-AddEventHandler("playerDropped",function()
-	local source = source
-end)
-
-AddEventHandler('esx:onPlayerJoined', function(src, char, data)
-	local src = src
-	local char = char
-	local data = data
-	Wait(1000)
-	local xPlayer = GetPlayerFromId(src)
-end)
-
-RegisterNetEvent('esx:setJob')
-AddEventHandler('esx:setJob', function(src,j,old)
-	local xPlayer = GetPlayerFromId(src)
-	local new = false
-
 end)
