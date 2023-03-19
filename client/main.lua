@@ -202,6 +202,7 @@ MyRoomMenu = function(data)
 	}
 	lib.registerContext({
         id = 'myroom',
+		menu = 'roomlist',
         title = 'My Motel Room Option',
         options = options
     })
@@ -269,6 +270,7 @@ RoomList = function(data)
 	end
     lib.registerContext({
         id = 'roomlist',
+		menu = 'rentmenu',
         title = 'Choose a Room',
         options = options
     })
@@ -319,13 +321,16 @@ end
 Owner = {}
 Owner.Rooms = {}
 Owner.Rooms.Occupants = function(data,index)
-	local motel = GlobalState.Motels[data.motel]
+	local motels , time = lib.callback.await('renzu_motels:getMotels',false)
+	local motel = motels[data.motel]
 	local players = motel.rooms[index] and motel.rooms[index].players or {}
 	local options = {}
 	for player,duration in pairs(players) do
+		local hour = math.floor((duration - time) / 3600)
+		local duration_left = hour .. ' Hours : '..math.floor(((duration - time) / 60) - (60 * hour))..' Minutes'
 		table.insert(options,{
 			title = 'Occupant '..player,
-			description = 'Rent Duration: '..duration,
+			description = 'Rent Duration: '..duration_left,
 			icon = 'hotel',
 			onSelect = function()
 				local success = lib.callback.await('renzu_motels:removeoccupant',false,data,index,player)
@@ -361,6 +366,7 @@ Owner.Rooms.Occupants = function(data,index)
 		end
 	end
 	lib.registerContext({
+		menu = 'owner_rooms',
         id = 'occupants_lists',
         title = 'Room #'..index..' Occupants',
         options = options
@@ -382,6 +388,7 @@ Owner.Rooms.List = function(data)
 		})
 	end
 	lib.registerContext({
+		menu = 'motelmenu',
         id = 'owner_rooms',
         title = data.label,
         options = options
@@ -587,6 +594,7 @@ MotelOwner = function(data)
 		end
 		lib.registerContext({
 			id = 'motelmenu',
+			menu = 'rentmenu',
 			title = data.label,
 			options = options
 		})
@@ -799,7 +807,7 @@ lib.onCache('weapon', function(weapon)
 end)
 
 Citizen.CreateThread(function()
-	Wait(1000)
+	while GlobalState.Motels == nil do Wait(1) end
     for motel, data in pairs(config.motels) do
         MotelZone(data)
     end
