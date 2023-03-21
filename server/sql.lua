@@ -67,7 +67,7 @@ Citizen.CreateThreadNow(function()
 	end
 	Wait(500)
 	for k,v in pairs(config.motels) do
-		local query = MySQL.query.await('SELECT 1 FROM renzu_motels WHERE `motel` = ?',{v.motel})
+		local query = MySQL.query.await('SELECT rooms FROM renzu_motels WHERE `motel` = ?',{v.motel})
 		if not query[1] then
 			local doors = {}
 			for doorindex,_ in pairs(v.doors) do
@@ -77,6 +77,13 @@ Citizen.CreateThreadNow(function()
 				doors.rooms[doorindex].lock = true
 			end
 			db.insert(v.motel,0,0,'[]',json.encode(doors.rooms),0)
+		elseif query[1] and #v.doors > #json.decode(query[1].rooms) then
+			local addnew = (#v.doors - #json.decode(query[1].rooms))
+			local rooms = json.decode(query[1].rooms) or {}
+			for i = 1, addnew do
+				table.insert(rooms,{players = {}, lock = true})
+			end
+			db.updateall('rooms = ?', '`motel`', v.motel, json.encode(rooms))
 		end
 	end
 end)
