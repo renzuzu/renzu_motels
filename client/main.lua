@@ -244,6 +244,7 @@ RoomList = function(data)
 						motel = data.motel,
 						duration = input[1],
 						hour_rate = rate,
+						uniquestash = data.uniquestash
 					})
 					if success then
 						Notify('Successfully rent a room', 'success')

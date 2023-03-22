@@ -161,6 +161,11 @@ lib.callback.register('renzu_motels:addoccupant', function(src,data,index,player
 		motels[data.motel].rooms[index].players[toPlayer.identifier].duration = ( os.time() + (tonumber(player[2]) * 3600))
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms))
+		if GetResourceState('ox_inventory') == 'started' then
+			local stashid = data.uniquestash and toPlayer.identifier or 'room'
+			exports.ox_inventory:RegisterStash('stash_'..data.motel..'_'..stashid..'_'..index, 'Storage', 70, 70000, false)
+			exports.ox_inventory:RegisterStash('fridge_'..data.motel..'_'..stashid..'_'..index, 'Fridge', 70, 70000, false)
+		end
 		return true
 	end
 	return false
