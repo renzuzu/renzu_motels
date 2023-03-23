@@ -1,6 +1,7 @@
 config = {}
 config.wardrobe = 'illenium-appearance' -- choose your skin menu
-config.target = false -- false = markers zones type. true = ox_target, qb-target
+config.target = true -- false = markers zones type. true = ox_target, qb-target
+config.autokickIfExpire = false -- auto kick occupants if rent is due. if false owner of motel must kick the occupants
 config.breakinJobs = { -- jobs can break in to door using gunfire in doors
 	['police'] = true,
 	['swat'] = true,
@@ -55,7 +56,7 @@ config.shells = {
 
 config.motels = {
 	[1] = { -- index name of motel
-		Mlo = true, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
+		Mlo = false, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'standard', -- shell type, configure only if using Mlo = true
 		label = 'Pink Cage Motel',
 		hour_rate = 1000,
@@ -66,7 +67,7 @@ config.motels = {
 		coord = vec3(326.04,-210.47,54.086), -- center of the motel location
 		radius = 50.0, -- radius of motel location
 		maxoccupants = 5, -- maximum renters per room
-		uniquestash = false, -- if true. each players has unique stash ID (non sharable and non stealable). if false stash is shared to all Occupants if maxoccupans is > 1
+		uniquestash = true, -- if true. each players has unique stash ID (non sharable and non stealable). if false stash is shared to all Occupants if maxoccupans is > 1
 		doors = { -- doors and other function of each rooms
 			[1] = { -- COORDINATES FOR GABZ PINKCAGE
 				door = vec3(307.21499633789,-212.79479980469,54.420265197754), -- Door requires when using MLO/Shells

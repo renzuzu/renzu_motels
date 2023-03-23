@@ -37,25 +37,28 @@ Citizen.CreateThreadNow(function()
 	GlobalState.Motels = motels
 	local save = {}
 	while true do
-		local motels = GlobalState.Motels
-		for motel,data in pairs(motels) do
-			if not save[motel] then save[motel] = 0 end
-			for doorindex,v in pairs(data.rooms or {}) do
-				local doorindex = tonumber(doorindex)
-				for player,char in pairs(v.players or {}) do
-					if (char.duration - os.time()) < 0 then
-						motels[motel].rooms[doorindex].players[player] = nil
+		if config.autokickIfExpire then
+			local motels = GlobalState.Motels
+			for motel,data in pairs(motels) do
+				if not save[motel] then save[motel] = 0 end
+				for doorindex,v in pairs(data.rooms or {}) do
+					local doorindex = tonumber(doorindex)
+					for player,char in pairs(v.players or {}) do
+						if (char.duration - os.time()) < 0 then
+							motels[motel].rooms[doorindex].players[player] = nil
+							db.updateall('rooms = ?', '`motel`', motel, json.encode(motels[motel].rooms))
+						end
+					end
+					if save[motel] <= 0 then
+						save[motel] = 60
 						db.updateall('rooms = ?', '`motel`', motel, json.encode(motels[motel].rooms))
 					end
 				end
-				if save[motel] <= 0 then
-					save[motel] = 60
-					db.updateall('rooms = ?', '`motel`', motel, json.encode(motels[motel].rooms))
-				end
+				save[motel] -= 1
 			end
-			save[motel] -= 1
+			GlobalState.Motels = motels
 		end
-		GlobalState.Motels = motels
+		GlobalState.MotelTimer = os.time()
 		Wait(60000)
 	end
 end)

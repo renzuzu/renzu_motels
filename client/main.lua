@@ -53,6 +53,21 @@ DoesPlayerHaveKey = function(data,room)
 	return false
 end
 
+GetPlayerKeys = function(data,room)
+	local items = GetInventoryItems('keys')
+	if not items then return false end
+	local keys = {}
+	for k,v in pairs(items) do
+		if v.metadata?.type == data.motel and v.metadata?.serial == data.index then
+			local key = v.metadata?.owner and room?.players[v.metadata?.owner]
+			if key then
+				keys[v.metadata.owner] = key.name
+			end
+		end
+	end
+	return keys
+end
+
 SetDoorState = function(data)
 	local motels = GlobalState.Motels or {}
 	local doorindex = data.index + (joaat(data.motel))
@@ -103,16 +118,26 @@ Door = function(data)
     end
 end
 
-RoomFunction = function(data)
+isRentExpired = function(data)
+	local motels = GlobalState.Motels[data.motel]
+	local room = motels?.rooms[data.index] or {}
+	local player = room?.players[PlayerData.identifier] or {}
+	return player?.duration and player?.duration < GlobalState.MotelTimer
+end
+
+RoomFunction = function(data,identifier)
+	if isRentExpired(data) then
+		return Notify('Your Rent is Due.  \n  Please Pay to Access')
+	end
 	if data.type == 'door' then
 		return Door(data)
 	elseif data.type == 'stash' then
-		local stashid = data.uniquestash and PlayerData.identifier or 'room'
+		local stashid = identifier or data.uniquestash and PlayerData.identifier or 'room'
 		return OpenStash(data,stashid)
 	elseif data.type == 'wardrobe' then
 		return config.wardrobes[config.wardrobe]()
 	elseif config.extrafunction[data.type] then
-		local stashid = data.uniquestash and PlayerData.identifier or 'room'
+		local stashid = identifier or data.uniquestash and PlayerData.identifier or 'room'
 		return config.extrafunction[data.type](data,stashid)
 	end
 end
