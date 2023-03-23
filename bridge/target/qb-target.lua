@@ -92,6 +92,23 @@ ShellTargets = function(data,offsets,loc,house)
 			})
 		end
 
+		if k == 'stash' then
+			local motels = GlobalState.Motels[data.motel]
+			local room = motels?.rooms[data.index] or {}
+			local keys = GetPlayerKeys(data,room)
+			for identifier,name in pairs(keys) do
+				table.insert(options,{
+					name = data.motel .. '_' .. k..'_'..data.index..'_'..identifier,
+					action = function() 
+						data.type = k
+						return RoomFunction(data,identifier)
+					end,
+					icon = config.icons[k],
+					label = k:upper()..' - ['..name..']'
+				})
+			end
+		end
+
 		local targetid = data.motel .. '_' .. k..'_'..data.index
 		exports['qb-target']:AddBoxZone(targetid, loc+v, 0.75, 0.75, {
 			name = targetid,

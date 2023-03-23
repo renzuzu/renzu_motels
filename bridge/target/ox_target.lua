@@ -84,6 +84,23 @@ ShellTargets = function(data,offsets,loc,house)
 			})
 		end
 
+		if k == 'stash' then
+			local motels = GlobalState.Motels[data.motel]
+			local room = motels?.rooms[data.index] or {}
+			local keys = GetPlayerKeys(data,room)
+			for identifier,name in pairs(keys) do
+				table.insert(options,{
+					name = data.motel .. '_' .. k..'_'..data.index..'_'..identifier,
+					onSelect = function() 
+						data.type = k
+						return RoomFunction(data,identifier)
+					end,
+					icon = config.icons[k],
+					label = k:upper()..' - ['..name..']'
+				})
+			end
+		end
+
 		local targetid = exports.ox_target:addBoxZone({
 			coords = loc+v,
 			size = vec3(2, 2, 2),

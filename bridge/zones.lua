@@ -40,6 +40,21 @@ ZoneMenu = function(data)
 		icon = config.icons[data.type],
 		title = data.label
 	})
+	if data.type == 'stash' then
+		local motels = GlobalState.Motels[data.motel]
+		local room = motels?.rooms[data.index] or {}
+		local keys = GetPlayerKeys(data,room)
+		for identifier,name in pairs(access) do
+			table.insert(options,{
+				name = data.index .. '_' .. data.type,
+				onSelect = function() 
+					return RoomFunction(data,identifier)
+				end,
+				icon = config.icons[data.type],
+				title = data.label..' - ['..name..']'
+			})
+		end
+	end
 	lib.registerContext({
 		id = 'door_menu',
 		title = 'Door Menu',
@@ -102,6 +117,22 @@ RoomMenu = function(type,data)
 		icon = config.icons[type],
 		title = type:upper()
 	})
+	if type == 'stash' then
+		local motels = GlobalState.Motels[data.motel]
+		local room = motels?.rooms[data.index] or {}
+		local keys = GetPlayerKeys(data,room)
+		for identifier,name in pairs(keys) do
+			table.insert(options,{
+				name = data.index .. '_' .. type,
+				onSelect = function() 
+					data.type = type
+					return RoomFunction(data,identifier)
+				end,
+				icon = config.icons[type],
+				title = type:upper()..' - ['..name..']'
+			})
+		end
+	end
 	if type == 'exit' then
 		table.insert(options,{
 			name = data.motel .. '_' ..type..'_'..data.index..'_door',
