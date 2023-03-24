@@ -44,6 +44,20 @@ config.shells = {
 	},
 }
 
+config.messageApi = function(data) -- {title,message,motel}
+	local motel = GlobalState.Motels[data.motel]
+	local identifier = motel.owned -- owner identifier
+	-- add your custom message here. ex. SMS phone 
+
+	-- basic notification (remove this if using your own message system)
+	local success = lib.callback.await('renzu_motels:MessageOwner',false,{identifier = identifier, message = data.message, title = data.title, motel = data.motel})
+	if success then
+		Notify('message has been sent', 'success')
+	else
+		Notify('message fail  \n  owner is not available yet', 'error')
+	end
+end
+
 -- @shell string (shell type)
 -- @Mlo string ( toggle MLO or shell type)
 -- @hour_rate int ( per hour rates)
@@ -53,9 +67,13 @@ config.shells = {
 -- @maxoccupants int (total player can rent in each Rooms)
 -- @uniquestash bool ( Toggle Non Sharable / Stealable Stash Storage )
 -- @doors table ( lists of doors feature coordinates. ex. stash, wardrobe) wardrobe,stash coords are only applicable in Mlo. using shells has offsets for stash and wardrobes.
+-- @manual boolean ( accept walk in occupants only )
+-- @businessprice int ( value of motel)
+-- @door int (door hash or doormodel `model`) for MLO type
 
 config.motels = {
 	[1] = { -- index name of motel
+		manual = false, -- set the motel to auto accept occupants or false only the owner of motel can accept Occupants
 		Mlo = false, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'standard', -- shell type, configure only if using Mlo = true
 		label = 'Pink Cage Motel',
@@ -159,6 +177,7 @@ config.motels = {
 	},
 
 	[2] = { -- index name of motel
+		manual = false, -- set the motel to auto accept occupants or false only the owner of motel can accept Occupants
 		Mlo = true, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'modern', -- shell type, configure only if using Mlo = true
 		label = 'Yacht Club Motel',
@@ -184,6 +203,7 @@ config.motels = {
 
 	[3] = { -- index name of motel
 		businessprice = 1000000,
+		manual = false, -- set the motel to auto accept occupants or false only the owner of motel can accept Occupants
 		Mlo = false, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'modern', -- shell type, configure only if using Mlo = true
 		label = 'Motel Modern', -- hotel label

@@ -80,7 +80,6 @@ RegisterNetEvent('renzu_motels:Door', function(data)
 	DoorSystemSetDoorState(doorindex, DoorSystemGetDoorState(doorindex) == 0 and 1 or 0, false, false)
 end)
 
-ClearPedTasks(cache.ped)
 Door = function(data)
     local dist = #(data.coord - GetEntityCoords(cache.ped)) < 2
     local motel = GlobalState.Motels[data.motel]
@@ -315,8 +314,9 @@ end
 MotelRentalMenu = function(data)
 	local motels = GlobalState.Motels
 	local rate = motels[data.motel].hour_rate or data.hour_rate
-	local options = {
-		{
+	local options = {}
+	if not data.manual then
+		table.insert(options,{
 			title = 'Rent a New Motel room',
 			description = '![rent](nui://renzu_motels/data/image/'..data.motel..'.png) \n Choose a room to rent \n Hour Rate: $'..rate,
 			icon = 'hotel',
@@ -324,8 +324,8 @@ MotelRentalMenu = function(data)
 				return RoomList(data)
 			end,
 			arrow = true,
-		},
-	}
+		})
+	end
 	if not motels[data.motel].owned or IsOwnerOrEmployee(data.motel) then
 		local title = not motels[data.motel].owned and 'Buy Motel Business' or 'Motel Management'
 		local description = not motels[data.motel].owned and 'Cost: '..data.businessprice or 'Manage Employees , Occupants and finance.'
@@ -340,12 +340,39 @@ MotelRentalMenu = function(data)
 		})
 	end
 
+	if #options == 0 then
+		Notify('This Motels Manually Accept Occupants  \n  Contact the Owner')
+		Wait(1500)
+		return SendMessageApi(data.motel)
+	end
+
     lib.registerContext({
         id = 'rentmenu',
         title = data.label,
         options = options
     })
 	lib.showContext('rentmenu')
+end
+
+SendMessageApi = function(motel)
+	local message = lib.alertDialog({
+		header = 'Do you want to Message the Owner?',
+		content = '## Message Motel Owner',
+		centered = true,
+		labels = {
+			cancel = 'close',
+			confirm = 'Message',
+		},
+		cancel = true
+	})
+	if message == 'cancel' then return end
+	local input = lib.inputDialog('Message', {
+		{type = 'input', label = 'Title', description = 'title of your message', icon = 'hash', required = true},
+		{type = 'textarea', label = 'Description', description = 'your message', icon = 'mail', required = true},
+		{type = 'number', label = 'Contact Number', icon = 'phone', required = false},
+	})
+	
+	config.messageApi({title = input[1], message = input[2], motel = motel})
 end
 
 Owner = {}
@@ -852,6 +879,15 @@ lib.onCache('weapon', function(weapon)
 			end
 		end
 	end
+end)
+
+RegisterNetEvent('renzu_motels:MessageOwner', function(data)
+	AddTextEntry('esxAdvancedNotification', data.message)
+    BeginTextCommandThefeedPost('esxAdvancedNotification')
+	ThefeedSetNextPostBackgroundColor(1)
+	AddTextComponentSubstringPlayerName(data.message)
+    EndTextCommandThefeedPostMessagetext('CHAR_FACEBOOK', 'CHAR_FACEBOOK', false, 1, data.motel, data.title)
+    EndTextCommandThefeedPostTicker(flash or false, true)
 end)
 
 Citizen.CreateThread(function()

@@ -305,6 +305,17 @@ lib.callback.register('renzu_motels:SetRouting', function(src,data,Type)
 	return true
 end)
 
+lib.callback.register('renzu_motels:MessageOwner', function(src,data)
+	local motels = GlobalState.Motels
+	if not motels[data.motel] or motels[data.motel].owned ~= data.identifier then return end
+	local xPlayer = GetPlayerFromId(data.identifier)
+	if xPlayer then
+		TriggerClientEvent('renzu_motels:MessageOwner',xPlayer.source, data)
+		return true
+	end
+	return false
+end)
+
 RegisterServerEvent("renzu_motels:Door")
 AddEventHandler('renzu_motels:Door', function(data)
 	local source = source
