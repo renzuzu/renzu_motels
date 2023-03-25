@@ -211,7 +211,7 @@ MyRoomMenu = function(data)
 		},
 		{
 			title = 'Generate Key Item',
-			description = 'Request a Motel Key',
+			description = 'Request a Door Key',
 			icon = 'key',
 			onSelect = function()
 				local success = lib.callback.await('renzu_motels:motelkey',false,{
@@ -222,6 +222,35 @@ MyRoomMenu = function(data)
 					Notify('Successfully requested a sharable motel key', 'success')
 				else
 					Notify('Fail to pay a rent', 'error')
+				end
+			end,
+			arrow = true,
+		},
+		{
+			title = 'End Rent',
+			description = 'End your rental period',
+			icon = 'ban',
+			onSelect = function()
+				if isRentExpired(data) then
+					Notify('Failed to End rent to room '..data.index..'  \n  Reason: your have a Balance Debt to pay','error')
+					return
+				end
+				local End = lib.alertDialog({
+					header = '## Warning',
+					content = ' You will no longer have access to the door and to your safes.',
+					centered = true,
+					labels = {
+						cancel = 'close',
+						confirm = 'End',
+					},
+					cancel = true
+				})
+				if End == 'cancel' then return end
+				local success = lib.callback.await('renzu_motels:removeoccupant',false,data,data.index,PlayerData.identifier)
+				if success then
+					Notify('Successfully End Your Rent to room '..data.index,'success')
+				else
+					Notify('Failed to End rent to room '..data.index,'error')
 				end
 			end,
 			arrow = true,

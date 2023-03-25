@@ -144,7 +144,7 @@ lib.callback.register('renzu_motels:removeoccupant', function(src,data,index,pla
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
 	local money = xPlayer.getMoney()
-	if motels[data.motel].owned == xPlayer.identifier then
+	if motels[data.motel].owned == xPlayer.identifier or motels[data.motel].rooms[index].players[player] then
 		motels[data.motel].rooms[index].players[player] = nil
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms))
