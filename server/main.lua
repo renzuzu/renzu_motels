@@ -254,13 +254,14 @@ end)
 
 local invoices = {}
 lib.callback.register('renzu_motels:sendinvoice', function(src,motel,data)
-	if data[1] == -1 then return false end
+	local toPlayer = tonumber(data[1])
+	if data[1] == -1 or not GetPlayerFromId(toPlayer) then return false end
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
 	if motels[motel].owned == xPlayer.identifier or motels[motel].employees[xPlayer.identifier] then
 		local id = math.random(999,9999)
 		invoices[id] = data[2]
-		TriggerClientEvent('renzu_motels:invoice',tonumber(data[1]),{
+		TriggerClientEvent('renzu_motels:invoice',toPlayer,{
 			motel = motel,
 			amount = data[2],
 			description = data[3],
