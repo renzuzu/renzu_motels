@@ -761,6 +761,7 @@ function Teleport(x, y, z, h ,exit)
 		end
 		DeleteEntity(house)
 		lib.callback.await('renzu_motels:SetRouting',false,data,'exit')
+		shelzones = {}
 	end
 end
 
