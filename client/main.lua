@@ -355,7 +355,7 @@ MotelRentalMenu = function(data)
 			arrow = true,
 		})
 	end
-	if not motels[data.motel].owned or IsOwnerOrEmployee(data.motel) then
+	if not motels[data.motel].owned and config.business or IsOwnerOrEmployee(data.motel) and config.business then
 		local title = not motels[data.motel].owned and 'Buy Motel Business' or 'Motel Management'
 		local description = not motels[data.motel].owned and 'Cost: '..data.businessprice or 'Manage Employees , Occupants and finance.'
 		table.insert(options,{
