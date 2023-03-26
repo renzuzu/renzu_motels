@@ -157,7 +157,7 @@ lib.callback.register('renzu_motels:addoccupant', function(src,data,index,player
 	local xPlayer = GetPlayerFromId(src)
 	local toPlayer = GetPlayerFromId(tonumber(player[1]))
 	local motels = GlobalState.Motels
-	if motels[data.motel].owned == xPlayer.identifier then
+	if motels[data.motel].owned == xPlayer.identifier and toPlayer then
 		if motels[data.motel].rooms[index].players[toPlayer.identifier] then return 'exist' end
 		if not motels[data.motel].rooms[index].players[toPlayer.identifier] then motels[data.motel].rooms[index].players[toPlayer.identifier] = {} end
 		motels[data.motel].rooms[index].players[toPlayer.identifier].name = toPlayer.name
