@@ -1,7 +1,6 @@
 fx_version 'cerulean'
 lua54 'yes'
 game 'gta5' 
-shared_script '@renzu_shield/init.lua'
 shared_scripts {
     '@ox_lib/init.lua',
 	'config.lua',
