@@ -221,7 +221,7 @@ MyRoomMenu = function(data)
 				if success then
 					Notify('Successfully requested a sharable motel key', 'success')
 				else
-					Notify('Fail to pay a rent', 'error')
+					Notify('Fail to Generate Key', 'error')
 				end
 			end,
 			arrow = true,
