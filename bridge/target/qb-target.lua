@@ -78,7 +78,7 @@ ShellTargets = function(data,offsets,loc,house)
 				return RoomFunction(data)
 			end,
 			icon = config.icons[k],
-			label = k:upper()
+			label = config.Text[k]
 		})
 		if k == 'exit' then
 			table.insert(options,{
@@ -104,7 +104,7 @@ ShellTargets = function(data,offsets,loc,house)
 						return RoomFunction(data,identifier)
 					end,
 					icon = config.icons[k],
-					label = k:upper()..' - ['..name..']'
+					label = config.Text[k]..' - ['..name..']'
 				})
 			end
 		end

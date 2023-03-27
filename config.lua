@@ -247,6 +247,15 @@ config.extrafunction = {
 	end,
 }
 
+config.Text = {
+	['stash'] = 'Stash',
+	['fridge'] = 'My Fridge',
+	['wardrobe'] = 'Wardrobe',
+	['bed'] = 'Sleep',
+	['door'] = 'Door',
+	['exit'] = 'Exit',
+}
+
 config.icons = {
 	['door'] = 'fas fa-door-open',
 	['stash'] = 'fas fa-box',

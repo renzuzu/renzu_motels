@@ -129,7 +129,7 @@ RoomMenu = function(type,data)
 					return RoomFunction(data,identifier)
 				end,
 				icon = config.icons[type],
-				title = type:upper()..' - ['..name..']'
+				title = config.Text[type]..' - ['..name..']'
 			})
 		end
 	end

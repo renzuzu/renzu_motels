@@ -741,7 +741,7 @@ MotelZone = function(data)
 		Citizen.CreateThreadNow(function()
 			for index, doors in pairs(data.doors) do
 				for type, coord in pairs(doors) do
-					MotelFunction({uniquestash = data.uniquestash, shell = data.shell, Mlo = data.Mlo, type = type, index = index, coord = coord, label = type:upper(), motel = data.motel, door = data.door})
+					MotelFunction({uniquestash = data.uniquestash, shell = data.shell, Mlo = data.Mlo, type = type, index = index, coord = coord, label = config.Text[type], motel = data.motel, door = data.door})
 				end
 			end
 			point = MotelRentalPoints(data) 
