@@ -44,7 +44,7 @@ ZoneMenu = function(data)
 		local motels = GlobalState.Motels[data.motel]
 		local room = motels?.rooms[data.index] or {}
 		local keys = GetPlayerKeys(data,room)
-		for identifier,name in pairs(access) do
+		for identifier,name in pairs(keys) do
 			table.insert(options,{
 				name = data.index .. '_' .. data.type,
 				onSelect = function() 
