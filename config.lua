@@ -81,6 +81,7 @@ config.motels = {
 		hour_rate = 1000,
 		businessprice = 1000000,
 		motel = 'pinkcage',
+		payment = 'money', -- money, bank
 		door = `gabz_pinkcage_doors_front`, -- door hash for MLO type
 		rentcoord = vec3(313.38,-225.20,54.212),
 		coord = vec3(326.04,-210.47,54.086), -- center of the motel location

@@ -17,7 +17,7 @@ AddEventHandler('renzu_motels:invoice', function(data)
 	local motels = GlobalState.Motels
     local buy = lib.alertDialog({
 		header = 'Invoice',
-		content = '![motel](nui://renzu_motels/data/image/'..data.motel..'.png) \n ## INFO \n **Description:** '..data.description..'  \n  **Amount:** $ '..data.amount,
+		content = '![motel](nui://renzu_motels/data/image/'..data.motel..'.png) \n ## INFO \n **Description:** '..data.description..'  \n  **Amount:** $ '..data.amount..'  \n **Payment method:** '..data.payment,
 		centered = true,
 		labels = {
 			cancel = 'close',
@@ -177,7 +177,7 @@ end
 Notify = function(msg,type)
 	lib.notify({
 		description = msg,
-		type = type
+		type = type or 'inform'
 	})
 end
 
@@ -192,10 +192,11 @@ MyRoomMenu = function(data)
 			icon = 'money-bill-wave-alt',
 			onSelect = function()
 				local input = lib.inputDialog('Pay or Deposit to motel', {
-					{type = 'number', label = 'Amount to Deposit', description = '$ '..rate..' per hour', icon = 'money', default = rate},
+					{type = 'number', label = 'Amount to Deposit', description = '$ '..rate..' per hour  \n  Payment Method: '..data.payment, icon = 'money', default = rate},
 				})
 				if not input then return end
 				local success = lib.callback.await('renzu_motels:payrent',false,{
+					payment = data.payment,
 					index = data.index,
 					motel = data.motel,
 					amount = input[1],
@@ -289,7 +290,7 @@ RoomList = function(data)
 				icon = 'door-closed',
 				onSelect = function()
 					local input = lib.inputDialog('Rent Duration', {
-						{type = 'number', label = 'Select a Duration in hours', description = '$ '..rate..' per hour', icon = 'clock', default = 1},
+						{type = 'number', label = 'Select a Duration in hours', description = '$ '..rate..' per hour   \n   Payment Method: '..data.payment, icon = 'clock', default = 1},
 					})
 					if not input then return end
 					local success = lib.callback.await('renzu_motels:rentaroom',false,{
@@ -297,6 +298,7 @@ RoomList = function(data)
 						motel = data.motel,
 						duration = input[1],
 						hour_rate = rate,
+						payment = data.payment,
 						uniquestash = data.uniquestash
 					})
 					if success then
@@ -316,6 +318,7 @@ RoomList = function(data)
 				icon = 'cog',
 				onSelect = function()
 					return MyRoomMenu({
+						payment = data.payment,
 						index = doorindex,
 						motel = data.motel,
 						duration = duration_left,
@@ -591,6 +594,7 @@ MotelOwner = function(data)
 						{type = 'number', label = 'Citizen ID', description = 'id of nearby citizen', icon = 'money', required = true},
 						{type = 'number', label = 'Amount', description = 'total amount to request', icon = 'money', required = true},
 						{type = 'input', label = 'Describe', description = 'Description of Invoice', icon = 'info'},
+						{type = 'checkbox', label = 'Payment Bank'},
 					})
 					if not input then return end
 					Notify('You Successfully Send the Invoice to '..input[1],'success')
@@ -741,7 +745,18 @@ MotelZone = function(data)
 		Citizen.CreateThreadNow(function()
 			for index, doors in pairs(data.doors) do
 				for type, coord in pairs(doors) do
-					MotelFunction({uniquestash = data.uniquestash, shell = data.shell, Mlo = data.Mlo, type = type, index = index, coord = coord, label = config.Text[type], motel = data.motel, door = data.door})
+					MotelFunction({
+						payment = data.payment or 'money',
+						uniquestash = data.uniquestash, 
+						shell = data.shell, 
+						Mlo = data.Mlo, 
+						type = type, 
+						index = index, 
+						coord = coord, 
+						label = config.Text[type], 
+						motel = data.motel, 
+						door = data.door
+					})
 				end
 			end
 			point = MotelRentalPoints(data) 

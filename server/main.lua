@@ -68,10 +68,10 @@ lib.callback.register('renzu_motels:rentaroom', function(src,data)
 	local motels = GlobalState.Motels
 	local identifier = xPlayer.identifier
 	if not motels[data.motel].rooms[data.index].players[identifier] then
-		local money = xPlayer.getMoney()
+		local money = xPlayer.getAccount(data.payment).money
 		local amount = (data.duration * data.hour_rate)
 		if money <= amount then return end
-		xPlayer.removeMoney(amount)
+		xPlayer.removeAccountMoney(data.payment,amount)
 		if not motels[data.motel].rooms[data.index].players[identifier] then motels[data.motel].rooms[data.index].players[identifier] = {} end
 		motels[data.motel].rooms[data.index].players[identifier].name = xPlayer.name
 		motels[data.motel].rooms[data.index].players[identifier].duration = (os.time() + ( data.duration * 3600))
@@ -93,12 +93,12 @@ lib.callback.register('renzu_motels:payrent', function(src,data)
 	local motels = GlobalState.Motels
 	local duration = data.amount / data.hour_rate
 	if duration < 1.0 then return false end
-	local money = xPlayer.getMoney()
+	local money = xPlayer.getAccount(data.payment).money
 	if money < data.amount then
 		return false
 	end
 	if motels[data.motel].rooms[data.index].players[xPlayer.identifier] then
-		xPlayer.removeMoney(data.amount)
+		xPlayer.removeAccountMoney(data.payment,data.amount)
 		motels[data.motel].revenue += data.amount
 		motels[data.motel].rooms[data.index].players[xPlayer.identifier].duration += ( duration * 3600)
 		GlobalState.Motels = motels
@@ -129,9 +129,9 @@ end)
 lib.callback.register('renzu_motels:buymotel', function(src,data)
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
-	local money = xPlayer.getMoney()
+	local money = xPlayer.getAccount(data.payment).money
 	if not motels[data.motel].owned and money >= data.businessprice then
-		xPlayer.removeMoney(data.businessprice)
+		xPlayer.removeAccountMoney(data.payment,data.businessprice)
 		motels[data.motel].owned = xPlayer.identifier
 		GlobalState.Motels = motels
 		db.updateall('owned = ?', '`motel`', data.motel, motels[data.motel].owned)
@@ -143,7 +143,6 @@ end)
 lib.callback.register('renzu_motels:removeoccupant', function(src,data,index,player)
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
-	local money = xPlayer.getMoney()
 	if motels[data.motel].owned == xPlayer.identifier or motels[data.motel].rooms[index].players[player] then
 		motels[data.motel].rooms[index].players[player] = nil
 		GlobalState.Motels = motels
@@ -266,6 +265,7 @@ lib.callback.register('renzu_motels:sendinvoice', function(src,motel,data)
 			amount = data[2],
 			description = data[3],
 			id = id,
+			payment = data[4] and 'bank' or 'money',
 			sender = src
 		})
 		local timer = 60
@@ -281,10 +281,10 @@ lib.callback.register('renzu_motels:payinvoice', function(src,data)
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
 	if invoices[data.id] then
-		local money = xPlayer.getMoney()
+		local money = xPlayer.getAccount(data.payment).money
 		if money >= data.amount then
 			motels[data.motel].revenue += tonumber(data.amount)
-			xPlayer.removeMoney(tonumber(data.amount))
+			xPlayer.removeAccountMoney(data.payment,tonumber(data.amount))
 			GlobalState.Motels = motels
 			invoices[data.id] = 'paid'
 			db.updateall('revenue = ?', '`motel`', data.motel, motels[data.motel].revenue)
