@@ -27,9 +27,8 @@ files {
 	'data/image/*.png',
 	'data/index.html',
 	'data/script.js',
-	'data/style.css',
 	'data/audio/door.mp4',
 	'data/audio/door.ogg',
-	'starter_shells_k4mb1.ytyp'
+	'stream/starter_shells_k4mb1.ytyp'
 }
 data_file 'DLC_ITYP_REQUEST' 'starter_shells_k4mb1.ytyp'
