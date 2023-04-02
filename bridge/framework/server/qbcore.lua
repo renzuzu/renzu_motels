@@ -33,5 +33,5 @@ GetPlayerFromId = function(src)
 		return {money = self.PlayerData.money[type]}
 	end
 
-	return xPlayer
+	return self
 end
