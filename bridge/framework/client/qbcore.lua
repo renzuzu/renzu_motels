@@ -27,3 +27,15 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(job)
 	
 	PlayerData.job.grade = PlayerData.job.grade.level
 end)
+
+GetInventoryItems = function(name)
+	local data = {}
+	local PlayerData = QBCORE.Functions.GetPlayerData()
+	for _, item in pairs(PlayerData.items) do
+		if name == item.name then
+			item.metadata = item.info
+			table.insert(data,item)
+		end
+	end
+	return data
+end

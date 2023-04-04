@@ -1,4 +1,4 @@
-if GetResourceState('qb-inventory') ~= 'started' then return end
+if GetResourceState('qs-inventory') ~= 'started' then return end
 
 OpenStash = function(data,identifier)
 	TriggerServerEvent('inventory:server:OpenInventory', 'stash', 'stash_'..data.motel..'_'..identifier..'_'..data.index, {})
