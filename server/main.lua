@@ -1,6 +1,11 @@
 --DeleteResourceKvp('renzu_motels')
 GlobalState.Motels = nil
 local db = import 'server/sql'
+local rental_period = {
+	['hour'] = 3600,
+	['day'] = 86400,
+	['month'] = 2592000
+}
 CreateInventoryHooks = function(motel,Type)
 	if GetResourceState('ox_inventory') ~= 'started' then return end
 	local inventory = '^'..Type..'_'..motel..'_%w+'
@@ -69,12 +74,12 @@ lib.callback.register('renzu_motels:rentaroom', function(src,data)
 	local identifier = xPlayer.identifier
 	if not motels[data.motel].rooms[data.index].players[identifier] then
 		local money = xPlayer.getAccount(data.payment).money
-		local amount = (data.duration * data.hour_rate)
+		local amount = (data.duration * data.rate)
 		if money <= amount then return end
 		xPlayer.removeAccountMoney(data.payment,amount)
 		if not motels[data.motel].rooms[data.index].players[identifier] then motels[data.motel].rooms[data.index].players[identifier] = {} end
 		motels[data.motel].rooms[data.index].players[identifier].name = xPlayer.name
-		motels[data.motel].rooms[data.index].players[identifier].duration = (os.time() + ( data.duration * 3600))
+		motels[data.motel].rooms[data.index].players[identifier].duration = (os.time() + ( data.duration * rental_period[data.rental_period]))
 		motels[data.motel].revenue += amount
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?, revenue = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms),motels[data.motel].revenue)
@@ -91,7 +96,7 @@ end)
 lib.callback.register('renzu_motels:payrent', function(src,data)
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
-	local duration = data.amount / data.hour_rate
+	local duration = data.amount / data.rate
 	if duration < 1.0 then return false end
 	local money = xPlayer.getAccount(data.payment).money
 	if money < data.amount then
@@ -100,7 +105,7 @@ lib.callback.register('renzu_motels:payrent', function(src,data)
 	if motels[data.motel].rooms[data.index].players[xPlayer.identifier] then
 		xPlayer.removeAccountMoney(data.payment,data.amount)
 		motels[data.motel].revenue += data.amount
-		motels[data.motel].rooms[data.index].players[xPlayer.identifier].duration += ( duration * 3600)
+		motels[data.motel].rooms[data.index].players[xPlayer.identifier].duration += ( duration * rental_period[data.rental_period])
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?, revenue = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms),motels[data.motel].revenue)
 		return true
@@ -160,7 +165,7 @@ lib.callback.register('renzu_motels:addoccupant', function(src,data,index,player
 		if motels[data.motel].rooms[index].players[toPlayer.identifier] then return 'exist' end
 		if not motels[data.motel].rooms[index].players[toPlayer.identifier] then motels[data.motel].rooms[index].players[toPlayer.identifier] = {} end
 		motels[data.motel].rooms[index].players[toPlayer.identifier].name = toPlayer.name
-		motels[data.motel].rooms[index].players[toPlayer.identifier].duration = ( os.time() + (tonumber(player[2]) * 3600))
+		motels[data.motel].rooms[index].players[toPlayer.identifier].duration = ( os.time() + (tonumber(player[2]) * rental_period[data.rental_period]))
 		GlobalState.Motels = motels
 		db.updateall('rooms = ?', '`motel`', data.motel, json.encode(motels[data.motel].rooms))
 		if GetResourceState('ox_inventory') == 'started' then

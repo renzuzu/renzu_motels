@@ -183,16 +183,16 @@ end
 
 MyRoomMenu = function(data)
 	local motels = GlobalState.Motels
-	local rate = motels[data.motel].hour_rate or data.hour_rate
+	local rate = motels[data.motel].hour_rate or data.rate
 
 	local options = {
 		{
 			title = 'My Room ['..data.index..'] - Pay a rent',
-			description = 'Pay your rent in due or advanced to Door '..data.index..' \n Rent Duration: '..data.duration..' \n Hour Rate: $ '..rate,
+			description = 'Pay your rent in due or advanced to Door '..data.index..' \n Rent Duration: '..data.duration..' \n '..data.rental_period..' Rate: $ '..rate,
 			icon = 'money-bill-wave-alt',
 			onSelect = function()
 				local input = lib.inputDialog('Pay or Deposit to motel', {
-					{type = 'number', label = 'Amount to Deposit', description = '$ '..rate..' per hour  \n  Payment Method: '..data.payment, icon = 'money', default = rate},
+					{type = 'number', label = 'Amount to Deposit', description = '$ '..rate..' per '..data.rental_period..'  \n  Payment Method: '..data.payment, icon = 'money', default = rate},
 				})
 				if not input then return end
 				local success = lib.callback.await('renzu_motels:payrent',false,{
@@ -200,7 +200,8 @@ MyRoomMenu = function(data)
 					index = data.index,
 					motel = data.motel,
 					amount = input[1],
-					hour_rate = rate,
+					rate = rate,
+					rental_period = data.rental_period
 				})
 				if success then
 					Notify('Successfully pay a rent', 'success')
@@ -276,7 +277,7 @@ end
 
 RoomList = function(data)
 	local motels , time = lib.callback.await('renzu_motels:getMotels',false)
-	local rate = motels[data.motel].hour_rate or data.hour_rate
+	local rate = motels[data.motel].hour_rate or data.rate
 	local options = {}
 	--local motels = GlobalState.Motels
 	for doorindex,v in ipairs(data.doors) do
@@ -290,14 +291,15 @@ RoomList = function(data)
 				icon = 'door-closed',
 				onSelect = function()
 					local input = lib.inputDialog('Rent Duration', {
-						{type = 'number', label = 'Select a Duration in hours', description = '$ '..rate..' per hour   \n   Payment Method: '..data.payment, icon = 'clock', default = 1},
+						{type = 'number', label = 'Select a Duration in '..data.rental_period..'s', description = '$ '..rate..' per '..data.rental_period..'   \n   Payment Method: '..data.payment, icon = 'clock', default = 1},
 					})
 					if not input then return end
 					local success = lib.callback.await('renzu_motels:rentaroom',false,{
 						index = doorindex,
 						motel = data.motel,
 						duration = input[1],
-						hour_rate = rate,
+						rate = rate,
+						rental_period = data.rental_period,
 						payment = data.payment,
 						uniquestash = data.uniquestash
 					})
@@ -322,7 +324,8 @@ RoomList = function(data)
 						index = doorindex,
 						motel = data.motel,
 						duration = duration_left,
-						hour_rate = rate
+						rate = rate,
+						rental_period = data.rental_period
 					})
 				end,
 				arrow = true,
@@ -345,12 +348,12 @@ end
 
 MotelRentalMenu = function(data)
 	local motels = GlobalState.Motels
-	local rate = motels[data.motel].hour_rate or data.hour_rate
+	local rate = motels[data.motel].hour_rate or data.rate
 	local options = {}
 	if not data.manual then
 		table.insert(options,{
 			title = 'Rent a New Motel room',
-			description = '![rent](nui://renzu_motels/data/image/'..data.motel..'.png) \n Choose a room to rent \n Hour Rate: $'..rate,
+			description = '![rent](nui://renzu_motels/data/image/'..data.motel..'.png) \n Choose a room to rent \n '..data.rental_period..' Rate: $'..rate,
 			icon = 'hotel',
 			onSelect = function()
 				return RoomList(data)
@@ -453,7 +456,7 @@ Owner.Rooms.Occupants = function(data,index)
 				onSelect = function()
 					local input = lib.inputDialog('New Occupant', {
 						{type = 'number', label = 'Citizen ID', description = 'ID of the citizen you want to add', icon = 'id-card', required = true},
-						{type = 'number', label = 'Select a Duration in hours', description = 'how many hours', icon = 'clock', default = 1},
+						{type = 'number', label = 'Select a Duration in '..data.rental_period..'s', description = 'how many '..data.rental_period..'s', icon = 'clock', default = 1},
 					})
 					if not input then return end
 					local success = lib.callback.await('renzu_motels:addoccupant',false,data,index,input)
@@ -574,7 +577,7 @@ MotelOwner = function(data)
 		end
 	elseif IsOwnerOrEmployee(data.motel) then
 		local revenue = motels[data.motel].revenue or 0
-		local rate = motels[data.motel].hour_rate or data.hour_rate
+		local rate = motels[data.motel].hour_rate or data.rate
 		local options = {
 			{
 				title = 'Motel Rooms',
@@ -611,16 +614,16 @@ MotelOwner = function(data)
 		if motels[data.motel].owned == PlayerData.identifier then
 			table.insert(options,{
 				title = 'Adjust Hour Rates',
-				description = 'Modify current hour rates. \n Hour Rates: '..rate,
+				description = 'Modify current '..data.rental_period..' rates. \n '..data.rental_period..' Rates: '..rate,
 				icon = 'hotel',
 				onSelect = function()
-					local input = lib.inputDialog('Edit Hour Rate', {
-						{type = 'number', label = 'Rate', description = 'Rate per Hour', icon = 'money', required = true},
+					local input = lib.inputDialog('Edit '..data.rental_period..' Rate', {
+						{type = 'number', label = 'Rate', description = 'Rate per '..data.rental_period..'', icon = 'money', required = true},
 					})
 					if not input then return end
 					local success = lib.callback.await('renzu_motels:editrate',false,data.motel,input[1])
 					if success then
-						Notify('You Successfully Change the Hour Rate','success')
+						Notify('You Successfully Change the '..data.rental_period..' Rate','success')
 					else
 						Notify('Fail to Modify','error')
 					end

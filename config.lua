@@ -78,7 +78,8 @@ config.motels = {
 		Mlo = false, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'standard', -- shell type, configure only if using Mlo = true
 		label = 'Pink Cage Motel',
-		hour_rate = 1000,
+		rental_period = 'day',-- hour, day, month
+		rate = 1000, -- cost per period
 		businessprice = 1000000,
 		motel = 'pinkcage',
 		payment = 'money', -- money, bank
@@ -183,7 +184,8 @@ config.motels = {
 		Mlo = true, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'modern', -- shell type, configure only if using Mlo = true
 		label = 'Yacht Club Motel',
-		hour_rate = 10000,
+		rental_period = 'day',-- hour, day, month
+		rate = 1000, -- cost per period
 		motel = 'yacht',
 		door = `gabz_pinkcage_doors_front`, -- door hash for MLO type
 		businessprice = 1000000,
@@ -209,7 +211,8 @@ config.motels = {
 		Mlo = false, -- if MLO you need to configure each doors coordinates,stash etc. if false resource will use shells
 		shell = 'modern', -- shell type, configure only if using Mlo = true
 		label = 'Motel Modern', -- hotel label
-		hour_rate = 15000, -- hotel hour rate
+		rental_period = 'day',-- hour, day, month
+		rate = 1000, -- cost per period
 		door = `gabz_pinkcage_doors_front`, -- door hash for MLO type
 		motel = 'hotelmodern3', -- hotel index name
 		rentcoord = vec3(515.21173095703,225.36326599121,104.74),
