@@ -69,7 +69,6 @@ Citizen.CreateThreadNow(function()
 end)
 
 lib.callback.register('renzu_motels:rentaroom', function(src,data)
-	if data.payment < 1 then return end
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
 	local identifier = xPlayer.identifier
