@@ -69,6 +69,7 @@ Citizen.CreateThreadNow(function()
 end)
 
 lib.callback.register('renzu_motels:rentaroom', function(src,data)
+	if data.payment < 1 then return end
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
 	local identifier = xPlayer.identifier
@@ -94,6 +95,7 @@ lib.callback.register('renzu_motels:rentaroom', function(src,data)
 end)
 
 lib.callback.register('renzu_motels:payrent', function(src,data)
+	if data.payment < 1 then return end
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
 	local duration = data.amount / data.rate

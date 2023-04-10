@@ -192,7 +192,7 @@ MyRoomMenu = function(data)
 			icon = 'money-bill-wave-alt',
 			onSelect = function()
 				local input = lib.inputDialog('Pay or Deposit to motel', {
-					{type = 'number', label = 'Amount to Deposit', description = '$ '..rate..' per '..data.rental_period..'  \n  Payment Method: '..data.payment, icon = 'money', default = rate},
+					{type = 'number', label = 'Amount to Deposit', description = '$ '..rate..' per '..data.rental_period..'  \n  Payment Method: '..data.payment, icon = 'money', default = rate, min = 1},
 				})
 				if not input then return end
 				local success = lib.callback.await('renzu_motels:payrent',false,{
@@ -291,7 +291,7 @@ RoomList = function(data)
 				icon = 'door-closed',
 				onSelect = function()
 					local input = lib.inputDialog('Rent Duration', {
-						{type = 'number', label = 'Select a Duration in '..data.rental_period..'s', description = '$ '..rate..' per '..data.rental_period..'   \n   Payment Method: '..data.payment, icon = 'clock', default = 1},
+						{type = 'number', label = 'Select a Duration in '..data.rental_period..'s', description = '$ '..rate..' per '..data.rental_period..'   \n   Payment Method: '..data.payment, icon = 'clock', default = 1, min = 1},
 					})
 					if not input then return end
 					local success = lib.callback.await('renzu_motels:rentaroom',false,{
@@ -455,7 +455,7 @@ Owner.Rooms.Occupants = function(data,index)
 				icon = 'hotel',
 				onSelect = function()
 					local input = lib.inputDialog('New Occupant', {
-						{type = 'number', label = 'Citizen ID', description = 'ID of the citizen you want to add', icon = 'id-card', required = true},
+						{type = 'number', label = 'Citizen ID', description = 'ID of the citizen you want to add', icon = 'id-card', required = true, min = 1},
 						{type = 'number', label = 'Select a Duration in '..data.rental_period..'s', description = 'how many '..data.rental_period..'s', icon = 'clock', default = 1},
 					})
 					if not input then return end
