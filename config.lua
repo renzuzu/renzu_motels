@@ -185,6 +185,7 @@ config.motels = {
 		shell = 'modern', -- shell type, configure only if using Mlo = true
 		label = 'Yacht Club Motel',
 		rental_period = 'day',-- hour, day, month
+		payment = 'money', -- money, bank
 		rate = 1000, -- cost per period
 		motel = 'yacht',
 		door = `gabz_pinkcage_doors_front`, -- door hash for MLO type
@@ -212,6 +213,7 @@ config.motels = {
 		shell = 'modern', -- shell type, configure only if using Mlo = true
 		label = 'Motel Modern', -- hotel label
 		rental_period = 'day',-- hour, day, month
+		payment = 'money', -- money, bank
 		rate = 1000, -- cost per period
 		door = `gabz_pinkcage_doors_front`, -- door hash for MLO type
 		motel = 'hotelmodern3', -- hotel index name
