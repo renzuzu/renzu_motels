@@ -1,4 +1,4 @@
-
+local kvpname = GetCurrentServerEndpoint()..'_inshells'
 CreateBlips = function()
 	for k,v in pairs(config.motels) do
 		local blip = AddBlipForCoord(v.rentcoord.x,v.rentcoord.y,v.rentcoord.z)
@@ -809,12 +809,14 @@ function Teleport(x, y, z, h ,exit)
 		DeleteEntity(house)
 		lib.callback.await('renzu_motels:SetRouting',false,data,'exit')
 		shelzones = {}
+		DeleteResourceKvp(kvpname)
+		LocalPlayer.state:set('inshell',false,true)
 	end
 end
 
-EnterShell = function(data)
+EnterShell = function(data,login)
 	local motels = GlobalState.Motels
-	if motels[data.motel].rooms[data.index].lock then
+	if motels[data.motel].rooms[data.index].lock and not login then
 		Notify('Door is Locked', 'error')
 		return false
 	end
@@ -826,7 +828,7 @@ EnterShell = function(data)
 	lib.callback.await('renzu_motels:SetRouting',false,data,'enter')
 	inhouse = true
 	Wait(1000)
-	local spawn = data.coord+vec3(0.0,0.0,1500.0)
+	local spawn = vec3(data.coord.x,data.coord.y,data.coord.z)+vec3(0.0,0.0,1500.0)
     local offsets = shelldata.offsets
 	local model = shelldata.shell
 	DoScreenFadeOut(500)
@@ -839,14 +841,19 @@ EnterShell = function(data)
 	while not HasModelLoaded(model) do
 	    Wait(1000)
 	end
+	local lastloc = GetEntityCoords(cache.ped)
 	house = CreateObject(model, spawn.x, spawn.y, spawn.z, false, false, false)
     FreezeEntityPosition(house, true)
-	LocalPlayer.state:set('lastloc',GetEntityCoords(cache.ped),false)
-	LocalPlayer.state:set('inhouse',GetEntityCoords(cache.ped),true)
-	SendNUIMessage({
-		type = 'door'
-	})
+	LocalPlayer.state:set('lastloc',data.lastloc or lastloc,false)
+	data.lastloc = data.lastloc or lastloc
+	if not login then
+		SendNUIMessage({
+			type = 'door'
+		})
+	end
 	Teleport(spawn.x + offsets.exit.x, spawn.y + offsets.exit.y, spawn.z+0.1, offsets.exit.h)
+	SetResourceKvp(kvpname,json.encode(data))
+
 	Citizen.CreateThreadNow(function()
 		ShellTargets(data,offsets,spawn,house)
 		while inhouse do
