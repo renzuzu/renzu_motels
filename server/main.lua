@@ -72,7 +72,7 @@ lib.callback.register('renzu_motels:rentaroom', function(src,data)
 	local xPlayer = GetPlayerFromId(src)
 	local motels = GlobalState.Motels
 	local identifier = xPlayer.identifier
-	if not motels[data.motel].rooms[data.index].players[identifier] then
+	if not motels[data.motel].rooms[data.index].players[identifier] and data.duration > 0 then
 		local money = xPlayer.getAccount(data.payment).money
 		local amount = (data.duration * data.rate)
 		if money <= amount then return end
