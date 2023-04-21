@@ -45,12 +45,16 @@ end
 DoesPlayerHaveKey = function(data,room)
 	local items = GetInventoryItems('keys')
 	if not items then return false end
+	local keys = {}
 	for k,v in pairs(items) do
 		if v.metadata?.type == data.motel and v.metadata?.serial == data.index then
-			return v.metadata?.owner and room?.players[v.metadata?.owner] or false
+			local key = v.metadata?.owner and room?.players[v.metadata?.owner]
+			if key then
+				keys[v.metadata.owner] = key.name
+			end
 		end
 	end
-	return false
+	return keys
 end
 
 GetPlayerKeys = function(data,room)
