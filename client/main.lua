@@ -76,7 +76,7 @@ end
 
 RegisterNetEvent('renzu_motels:Door', function(data)
 	if not data.Mlo then return end
-	local doorindex = data.index + (joaat(data.motel))
+	local doorindex = data.doorindex + (joaat(data.motel))
 	DoorSystemSetDoorState(doorindex, DoorSystemGetDoorState(doorindex) == 0 and 1 or 0, false, false)
 end)
 
@@ -91,6 +91,7 @@ Door = function(data)
         TriggerServerEvent('renzu_motels:Door', {
             motel = data.motel,
             index = data.index,
+			doorindex = data.doorindex,
             coord = data.coord,
 			Mlo = data.Mlo,
         })
@@ -166,6 +167,7 @@ LockPick = function(data)
 		TriggerServerEvent('renzu_motels:Door', {
             motel = data.motel,
             index = data.index,
+			doorindex = data.doorindex,
             coord = data.coord,
 			Mlo = data.Mlo
         })
@@ -749,14 +751,15 @@ MotelZone = function(data)
 			for index, doors in pairs(data.doors) do
 				for type, door in pairs(doors) do
 					if type == 'door' then
-						for k,v in pairs(door) do
+						for doorindex,v in pairs(door) do
 							MotelFunction({
 								payment = data.payment or 'money',
 								uniquestash = data.uniquestash, 
 								shell = data.shell, 
 								Mlo = data.Mlo, 
 								type = type, 
-								index = index, 
+								index = index,
+								doorindex = index + doorindex,
 								coord = v.coord, 
 								label = config.Text[type], 
 								motel = data.motel, 
@@ -931,17 +934,18 @@ lib.onCache('weapon', function(weapon)
 			for k,data in pairs(config.motels) do
 				for k,v in pairs(data.doors) do
 					if v.door then
-						for k,v in pairs(v.door) do
+						for k2,v in pairs(v.door) do
 							if #(vec3(bullet.x,bullet.y,bullet.z) - vec3(v.coord.x,v.coord.y,v.coord.z)) < 2 and motels[data.motel].rooms[k].lock then
 								TriggerServerEvent('renzu_motels:Door', {
 									motel = data.motel,
 									index = k,
-									coord = v.door,
+									doorindex = k + k2,
+									coord = v.coord,
 									Mlo = data.Mlo,
 								})
 								local text
 								if data.Mlo then
-									local doorindex = k + (joaat(data.motel))
+									local doorindex = index + (joaat(data.motel))
 									text = DoorSystemGetDoorState(doorindex) == 0 and 'You Destroy the Motel Door'
 								else
 									text = 'You Destroy the Motel Door'

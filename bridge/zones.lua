@@ -66,7 +66,7 @@ end
 MotelFunction = function(data)
 	if not data.Mlo and data.type ~= 'door' then return end
 	local options = {}
-	local doorindex = data.index + (joaat(data.motel))
+	local doorindex = data.doorindex + (joaat(data.motel))
 	if data.type == 'door' then
 		AddDoorToSystem(doorindex, data.door, data.coord)
 		SetDoorState(data)
