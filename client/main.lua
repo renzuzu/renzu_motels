@@ -747,19 +747,36 @@ MotelZone = function(data)
 		inMotelZone = true
 		Citizen.CreateThreadNow(function()
 			for index, doors in pairs(data.doors) do
-				for type, coord in pairs(doors) do
-					MotelFunction({
-						payment = data.payment or 'money',
-						uniquestash = data.uniquestash, 
-						shell = data.shell, 
-						Mlo = data.Mlo, 
-						type = type, 
-						index = index, 
-						coord = coord, 
-						label = config.Text[type], 
-						motel = data.motel, 
-						door = data.door
-					})
+				for type, door in pairs(doors) do
+					if type == 'door' then
+						for k,v in pairs(door) do
+							MotelFunction({
+								payment = data.payment or 'money',
+								uniquestash = data.uniquestash, 
+								shell = data.shell, 
+								Mlo = data.Mlo, 
+								type = type, 
+								index = index, 
+								coord = v.coord, 
+								label = config.Text[type], 
+								motel = data.motel, 
+								door = v.model
+							})
+						end
+					else
+						MotelFunction({
+							payment = data.payment or 'money',
+							uniquestash = data.uniquestash, 
+							shell = data.shell, 
+							Mlo = data.Mlo, 
+							type = type, 
+							index = index, 
+							coord = door, 
+							label = config.Text[type], 
+							motel = data.motel, 
+							door = data.door
+						})
+					end
 				end
 			end
 			point = MotelRentalPoints(data) 
@@ -913,21 +930,25 @@ lib.onCache('weapon', function(weapon)
 			local _, bullet, _ = RayCastGamePlayCamera(200.0,1)
 			for k,data in pairs(config.motels) do
 				for k,v in pairs(data.doors) do
-					if #(vec3(bullet.x,bullet.y,bullet.z) - vec3(v.door.x,v.door.y,v.door.z)) < 2 and motels[data.motel].rooms[k].lock then
-						TriggerServerEvent('renzu_motels:Door', {
-							motel = data.motel,
-							index = k,
-							coord = v.door,
-							Mlo = data.Mlo,
-						})
-						local text
-						if data.Mlo then
-							local doorindex = k + (joaat(data.motel))
-							text = DoorSystemGetDoorState(doorindex) == 0 and 'You Destroy the Motel Door'
-						else
-							text = 'You Destroy the Motel Door'
+					if v.door then
+						for k,v in pairs(v.door) do
+							if #(vec3(bullet.x,bullet.y,bullet.z) - vec3(v.coord.x,v.coord.y,v.coord.z)) < 2 and motels[data.motel].rooms[k].lock then
+								TriggerServerEvent('renzu_motels:Door', {
+									motel = data.motel,
+									index = k,
+									coord = v.door,
+									Mlo = data.Mlo,
+								})
+								local text
+								if data.Mlo then
+									local doorindex = k + (joaat(data.motel))
+									text = DoorSystemGetDoorState(doorindex) == 0 and 'You Destroy the Motel Door'
+								else
+									text = 'You Destroy the Motel Door'
+								end
+								Notify(text,'warning')
+							end
 						end
-						Notify(text,'warning')
 					end
 				end
 				Wait(1000)
