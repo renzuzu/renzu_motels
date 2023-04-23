@@ -945,7 +945,7 @@ lib.onCache('weapon', function(weapon)
 								})
 								local text
 								if data.Mlo then
-									local doorindex = index + (joaat(data.motel))
+									local doorindex = (k + k2) + (joaat(data.motel))
 									text = DoorSystemGetDoorState(doorindex) == 0 and 'You Destroy the Motel Door'
 								else
 									text = 'You Destroy the Motel Door'
