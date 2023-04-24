@@ -108,7 +108,6 @@ config.motels = {
 				-- luckyme = vec3(0.0,0.0,0.0) -- extra
 			},
 			[2] = {
-				models = {`gabz_pinkcage_doors_front`}, -- door hashes , use this if your using multiple door model per room
 				door = { -- Door config requires when using MLO
 					[1] = { -- requested by community. supports multiple door models.
 						coord = vec3(310.95474243164,-202.91288757324,54.421058654785), -- exact coordinates of door
