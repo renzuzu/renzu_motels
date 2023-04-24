@@ -66,8 +66,8 @@ end
 MotelFunction = function(data)
 	if not data.Mlo and data.type ~= 'door' then return end
 	local options = {}
-	local doorindex = data.doorindex + (joaat(data.motel))
 	if data.type == 'door' then
+		local doorindex = data.doorindex + (joaat(data.motel))
 		AddDoorToSystem(doorindex, data.door, data.coord)
 		SetDoorState(data)
 		local blip = AddBlipForCoord(data.coord.x,data.coord.y,data.coord.z)
@@ -81,6 +81,7 @@ MotelFunction = function(data)
 		EndTextCommandSetBlipName(blip)
 		table.insert(blips,blip)
 	end
+
 	local point = lib.points.new(data.coord, 2)
 	
 	function point:onEnter()
